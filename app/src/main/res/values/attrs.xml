@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="FloatingOptions">
+        <attr name="alphaWhenIdle" format="float"/>
+        <attr name="menu" format="reference"/>
+        <attr name="optionsSize" format="dimension"/>
+        <attr name="buttonDrawable" format="reference"/>
+        <attr name="optionsMainColor" format="color"/>
+    </declare-styleable>
+</resources>
