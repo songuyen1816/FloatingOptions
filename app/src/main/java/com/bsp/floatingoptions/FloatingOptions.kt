@@ -11,10 +11,6 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.RelativeLayout
-import androidx.core.view.marginBottom
-import androidx.core.view.marginLeft
-import androidx.core.view.marginRight
-import androidx.core.view.marginTop
 
 
 class FloatingOptions(context: Context, attrs: AttributeSet?) : RelativeLayout(context, attrs) {
@@ -22,6 +18,10 @@ class FloatingOptions(context: Context, attrs: AttributeSet?) : RelativeLayout(c
     companion object {
         const val TAG = "FloatingOptions"
     }
+
+    var prev: Double = 0.0
+    var current: Double = 0.0
+    var dif: Double = 0.0
 
     private var buttonDrawable: Drawable
     private var optionsSize: Int = 0
@@ -44,10 +44,12 @@ class FloatingOptions(context: Context, attrs: AttributeSet?) : RelativeLayout(c
 
     private lateinit var buttonView: View
     private var optionViews = mutableListOf<View>()
+    private var optionsMargin = 0
 
     private var onOptionSelectListener: OptionSelectedListener? = null
 
     private var alphaWhenIdle = 0f
+    private val gestureDetector: GestureDetector? = null
 
     init {
 
@@ -59,6 +61,8 @@ class FloatingOptions(context: Context, attrs: AttributeSet?) : RelativeLayout(c
             typedArray.getDimensionPixelSize(R.styleable.FloatingOptions_optionsSize, 0)
 
         alphaWhenIdle = typedArray.getFloat(R.styleable.FloatingOptions_alphaWhenIdle, 0f)
+
+        optionsMargin = typedArray.getDimensionPixelSize(R.styleable.FloatingOptions_optionsMargin, 0)
 
         alpha = alphaWhenIdle
 
@@ -110,7 +114,7 @@ class FloatingOptions(context: Context, attrs: AttributeSet?) : RelativeLayout(c
                     }
 
                     lp.addRule(CENTER_HORIZONTAL)
-                    lp.topMargin = 15
+                    lp.topMargin = optionsMargin
 
                     val optionImg = ImageView(context)
                     optionImg.id = generateViewId()
@@ -150,7 +154,7 @@ class FloatingOptions(context: Context, attrs: AttributeSet?) : RelativeLayout(c
                         lp.addRule(ABOVE, buttonId)
                     }
                     lp.addRule(CENTER_HORIZONTAL)
-                    lp.bottomMargin = 15
+                    lp.bottomMargin = optionsMargin
 
                     optionImg.id = generateViewId()
                     lastOptionId = optionImg.id
@@ -158,6 +162,9 @@ class FloatingOptions(context: Context, attrs: AttributeSet?) : RelativeLayout(c
                     optionImg.scaleType = ImageView.ScaleType.CENTER_INSIDE
                     optionImg.adjustViewBounds = true
                     optionImg.setImageDrawable(optionsMenu.getItem(i).icon)
+
+                    //TODO For debug layout
+//                    optionImg.setBackgroundResource(R.drawable.background_debug)
 
                     optionViews.add(optionImg)
 
@@ -196,7 +203,7 @@ class FloatingOptions(context: Context, attrs: AttributeSet?) : RelativeLayout(c
 
     private fun hideView(index: Int, view: View) {
         val anim = AnimationUtils.loadAnimation(context, R.anim.option_hide_anim)
-        anim.setAnimationListener(object : Animation.AnimationListener{
+        anim.setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationStart(p0: Animation?) {
             }
 
@@ -209,11 +216,12 @@ class FloatingOptions(context: Context, attrs: AttributeSet?) : RelativeLayout(c
         })
         view.startAnimation(anim)
         isAnimating = true
+    }
 
-        if (index == optionsMenu.size() - 1) {
-            postDelayed({
-                isAnimating = false
-            }, 300)
+    fun dismissOptions() {
+        if (isShowing && !isAnimating) {
+            isShowing = false
+            hideOptions()
         }
     }
 
@@ -232,28 +240,29 @@ class FloatingOptions(context: Context, attrs: AttributeSet?) : RelativeLayout(c
             decreaseParentOptionViewHeight()
             optionViews.clear()
             alpha = alphaWhenIdle
+            isAnimating = false
         }, 300 + (optionsMenu.size().toLong() * 80))
     }
 
     private fun increaseParentViewHeight() {
         if (!isShowBelow) {
-            val test = ((optionsSize + 15) * (optionsMenu.size()))
+            val test = ((optionsSize + optionsMargin) * (optionsMenu.size()))
             y -= test
         }
 
         val containerLayoutParams = layoutParams
-        containerLayoutParams.height = height + ((optionsSize + 15) * (optionsMenu.size()))
+        containerLayoutParams.height = height + ((optionsSize + optionsMargin) * (optionsMenu.size()))
         layoutParams = containerLayoutParams
     }
 
     private fun decreaseParentOptionViewHeight() {
         if (!isShowBelow) {
-            val test = ((optionsSize + 15) * (optionsMenu.size()))
+            val test = ((optionsSize + optionsMargin) * (optionsMenu.size()))
             y += test
         }
 
         val containerLayoutParams = layoutParams
-        containerLayoutParams.height = height - ((optionsSize + 15) * (optionsMenu.size()))
+        containerLayoutParams.height = height - ((optionsSize + optionsMargin) * (optionsMenu.size()))
         layoutParams = containerLayoutParams
     }
 
@@ -271,18 +280,21 @@ class FloatingOptions(context: Context, attrs: AttributeSet?) : RelativeLayout(c
     }
 
 
+    //TODO add break point for debug
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
 
         if (event.action == MotionEvent.ACTION_DOWN) {
-            if (!isAnimating) {
+            prev = (System.currentTimeMillis()).toDouble();
+            return if (!isAnimating) {
                 isDown = true
                 dX = x - event.rawX
                 dY = y - event.rawY
-
                 alpha = 1f
+                true
+            } else {
+                false
             }
-            return true
         }
 
         if (event.action == MotionEvent.ACTION_MOVE) {
@@ -300,25 +312,16 @@ class FloatingOptions(context: Context, attrs: AttributeSet?) : RelativeLayout(c
                 if (yMoving + height > screenHeight - marginBottom) yMoving =
                     (screenWidth - width - marginBottom).toFloat()
 
-                Log.e(TAG, "move: $xMoving / $yMoving" )
+                Log.e(TAG, "move: $xMoving / $yMoving")
                 x = xMoving
                 y = yMoving
             }
             return true
         }
         if (event.action == MotionEvent.ACTION_UP) {
-            isDown = false
-
-            if (isMoving && !isAnimating && !isShowing) {
-                if (x + (width / 2) > screenWidth / 2) {
-                    animate().translationX((screenWidth - width - (marginRight * 2)).toFloat())
-                        .setDuration(200).start()
-                } else {
-                    animate().translationX(0f).setDuration(200).start()
-                }
-                isMoving = false
-                alpha = alphaWhenIdle
-            } else {
+            current = (System.currentTimeMillis()).toDouble();
+            dif = current - prev;
+            if (dif <= 120) {
                 performClick()
                 if (isShowing && !isAnimating) {
                     isShowing = false
@@ -327,7 +330,47 @@ class FloatingOptions(context: Context, attrs: AttributeSet?) : RelativeLayout(c
                     isShowing = true
                     showOptions()
                 }
+            } else {
+                if (dif > 120) {
+                    if (isMoving && !isAnimating && !isShowing) {
+                        if (x + (width / 2) > screenWidth / 2) {
+                            animate().translationX((screenWidth - width - (marginRight * 2)).toFloat())
+                                .setDuration(200).start()
+                        } else {
+                            animate().translationX(0f).setDuration(200).start()
+                        }
+                        isMoving = false
+                        alpha = alphaWhenIdle
+                        current = 0.0
+                        prev = 0.0
+                        dif = 0.0
+                    }
+                }
+
             }
+            isDown = false
+
+//            if (isMoving && !isAnimating && !isShowing) {
+//                if (x + (width / 2) > screenWidth / 2) {
+//                    animate().translationX((screenWidth - width - (marginRight * 2)).toFloat())
+//                            .setDuration(200).start()
+//                } else {
+//                    animate().translationX(0f).setDuration(200).start()
+//                }
+//                isMoving = false
+//                alpha = alphaWhenIdle
+//            }
+//            else {
+//
+//                performClick()
+//                if (isShowing && !isAnimating) {
+//                    isShowing = false
+//                    hideOptions()
+//                } else if (!isShowing && !isAnimating) {
+//                    isShowing = true
+//                    showOptions()
+//                }
+//            }
 
             return true
         }
@@ -340,3 +383,18 @@ class FloatingOptions(context: Context, attrs: AttributeSet?) : RelativeLayout(c
     }
 
 }
+
+inline val View.marginLeft: Int
+    get() = (layoutParams as? ViewGroup.MarginLayoutParams)?.leftMargin ?: 0
+
+
+inline val View.marginTop: Int
+    get() = (layoutParams as? ViewGroup.MarginLayoutParams)?.topMargin ?: 0
+
+
+inline val View.marginRight: Int
+    get() = (layoutParams as? ViewGroup.MarginLayoutParams)?.rightMargin ?: 0
+
+
+inline val View.marginBottom: Int
+    get() = (layoutParams as? ViewGroup.MarginLayoutParams)?.bottomMargin ?: 0

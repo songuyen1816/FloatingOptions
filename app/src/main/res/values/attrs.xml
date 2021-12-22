@@ -6,5 +6,6 @@
         <attr name="optionsSize" format="dimension"/>
         <attr name="buttonDrawable" format="reference"/>
         <attr name="optionsMainColor" format="color"/>
+        <attr name="optionsMargin" format="dimension"/>
     </declare-styleable>
 </resources>
