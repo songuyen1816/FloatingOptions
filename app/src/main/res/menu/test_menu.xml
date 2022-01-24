@@ -3,14 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/menu_1"
-        android:icon="@drawable/ic_test"
+        android:icon="@drawable/ic_fab_chat_white"
         android:title=""/>
     <item
         android:id="@+id/menu_2"
-        android:icon="@drawable/ic_test"
+        android:icon="@drawable/ic_fab_feedback_white"
         android:title=""/>
     <item
         android:id="@+id/menu_3"
-        android:icon="@drawable/ic_test"
+        android:icon="@drawable/ic_fab_hotline_white"
+        android:title=""/>
+    <item
+        android:id="@+id/menu_4"
+        android:icon="@drawable/ic_fab_survey_white"
         android:title=""/>
 </menu>

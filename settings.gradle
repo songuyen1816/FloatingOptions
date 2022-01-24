@@ -8,3 +8,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "FloatingOptions"
 include ':app'
+include ':floatingoptions'

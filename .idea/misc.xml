@@ -3,8 +3,16 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="../../../../layout/custom_preview.xml" value="0.2796875" />
         <entry key="..\:/Workspace/FloatingOptions/app/src/main/res/layout/activity_main.xml" value="0.1793478260869565" />
         <entry key="..\:/Workspace/FloatingOptions/app/src/main/res/menu/test_menu.xml" value="0.259375" />
+        <entry key="app/src/main/res/drawable/ic_fab_action.xml" value="0.14583333333333334" />
+        <entry key="app/src/main/res/drawable/ic_fab_chat_white.xml" value="0.14583333333333334" />
+        <entry key="app/src/main/res/drawable/ic_fab_feedback_white.xml" value="0.14583333333333334" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.24230072463768115" />
+        <entry key="app/src/main/res/menu/test_menu.xml" value="0.1296875" />
+        <entry key="floatingoptions/src/main/res/drawable/ic_test.xml" value="0.14583333333333334" />
+        <entry key="floatingoptions/src/main/res/layout/activity_main.xml" value="0.1296875" />
       </map>
     </option>
   </component>

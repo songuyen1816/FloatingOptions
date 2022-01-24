@@ -1,4 +1,4 @@
-package com.bsp.floatingoptions
+package com.songuyen1816.floatingoptions
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -280,7 +280,6 @@ class FloatingOptions(context: Context, attrs: AttributeSet?) : RelativeLayout(c
     }
 
 
-    //TODO add break point for debug
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
 

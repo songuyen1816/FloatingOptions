@@ -1,4 +1,4 @@
-package com.bsp.floatingoptions
+package com.songuyen1816.floatingoptions
 
 import android.content.res.Resources
 
